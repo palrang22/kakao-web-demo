@@ -5,10 +5,12 @@
 .studio {
   --text: var(--fog-2);
   --text-h: var(--paper);
-  --bg: var(--ink-2);
+  /* '인증이 설정되지 않았습니다' 배너(.banner-warn, --accent-bg)와 같은 톤으로 통일 —
+     흰 배경 위에서 accent 12%/6% 를 섞은 값이라 배너와 사실상 동일한 색으로 보인다 */
+  --bg: color-mix(in srgb, var(--accent) 12%, white);
   --border: var(--line);
-  --code-bg: var(--ink-3);
-  --social-bg: var(--ink-2);
+  --code-bg: color-mix(in srgb, var(--accent) 6%, white);
+  --social-bg: color-mix(in srgb, var(--accent) 12%, white);
   --accent-bg: color-mix(in srgb, var(--accent) 12%, transparent);
   --accent-border: color-mix(in srgb, var(--accent) 45%, transparent);
 }
