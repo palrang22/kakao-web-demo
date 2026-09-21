@@ -1,0 +1,80 @@
+/* Vite 스타터에서 남은 전역 설정 중 "아직 실제로 쓰이는 것"만 남겼다.
+ *
+ * 원래 이 파일에는 스타터의 보라색 팔레트와 `h1,h2 { color: var(--text-h) }` 가 있었고,
+ * --text-h 가 @media (prefers-color-scheme: dark) 에서 #f3f4f6 으로 바뀌었다.
+ * 그 결과 OS 가 다크면 우리 data-theme 과 무관하게 헤드라인이 흰색으로 고정돼서
+ * 라이트 모드에서 히어로 문구가 배경에 묻혀 사라졌다.
+ *
+ * 색과 타이포의 단일 소스는 src/styles/hub.css 의 :root 다. 여기에 색을 두지 말 것.
+ */
+/* 카카오 AI 돛 Summit 26 공식 사이트(kakaoaisail.org)에서 그대로 가져온 폰트.
+ * 사용자가 지정한 "카카오큰글씨"(KakaoBigSans) — 굵고 둥근 디스플레이용 산세리프. */
+@font-face {
+  font-family: "KakaoBigSans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/KakaoBigSans-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "KakaoBigSans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/KakaoBigSans-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "KakaoBigSans";
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/KakaoBigSans-ExtraBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "KakaoSmallSans";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/KakaoSmallSans-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "KakaoSmallSans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/KakaoSmallSans-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "KakaoSmallSans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/KakaoSmallSans-Bold.woff2") format("woff2");
+}
+
+:root {
+  --sans: "Pretendard Variable", "Pretendard", "Helvetica Neue", Helvetica,
+    "Apple SD Gothic Neo", Arial, sans-serif;
+  /* 카카오 AI 돛 Summit 26 사이트와 같은 짝 — 큰글씨(헤드라인) / 작은글씨(본문) */
+  --sans-kakao: "KakaoBigSans", var(--sans);
+  --sans-kakao-body: "KakaoSmallSans", var(--sans);
+  --mono: ui-monospace, Consolas, monospace;
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
+  /* rem 기준. studio.css 가 rem 을 많이 쓰므로 바꾸면 전체 크기가 흔들린다 */
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    font-size: 16px;
+  }
+}
+
+p {
+  margin: 0;
+}

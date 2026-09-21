@@ -1,0 +1,443 @@
+/* Kakao × Google Cloud — AI 돛 Summit 26
+ * 원본 시안: docs/design/SM_AI_Day_landing.html (SM AI Day 부스용, 카카오 행사로 리브랜딩)
+ * base64 로 박혀 있던 로고는 public/ 의 실제 SVG 참조로 교체했다.
+ */
+:root{
+    color-scheme: light;
+    /* AI 돛 Summit 26 브랜드 컬러 — kakaoaisail.org 실제 사용값 확인 완료 */
+    --brand:#1A199B;
+    --brand-2:#325CFF;
+    --brand-on:#ffffff;    /* 브랜드 강조색 위에 얹는 글자 */
+    /* 카카오 옐로/브라운 — Look Studio(Try-On) 전용 포인트. 옐로 순색은 흰 배경 위
+       텍스트·아이콘 대비가 거의 없어서(1.1:1), 채움(bar/wash)엔 옐로 순색을,
+       흰 배경·옐로 배경 위 텍스트·아이콘엔 카카오 브라운을 쓴다(브라운은 둘 다에서 대비 확보). */
+    --brand-yellow:#FAE300;
+    --brand-yellow-ink:#371D1E;
+    --ink:#ffffff;          /* 배경 — 화이트 고정 */
+    --ink-2:#F5F5F5;        /* 패널 */
+    --ink-3:#EAF2FF;        /* raised / hover — 옅은 블루 틴트 */
+    --line:#DDDDDD;         /* hairline */
+    --line-2:#CCCCCC;
+    --fog:rgba(25,25,25,.55);          /* muted text */
+    --fog-2:rgba(25,25,25,.75);
+    --paper:#191919;        /* 글자 — 검정 계열 */
+    --hero-glow:#F0F3FA;    /* 히어로 상단 옅은 블루 틴트 */
+    --mod-bg:#F0F3FA;       /* 스튜디오 카드 */
+    --on-accent:#0a0a0b;    /* 강조색 위에 얹는 글자 — studio.css 의 Google 색 강조와 공유, 바꾸지 말 것 */
+    /* Google Cloud accents — studio.css 내부 캡처 화면에서 계속 쓰인다. 라이트 배경용 진한 변형. 손대지 말 것 */
+    --g-blue:#1A73E8;
+    --g-red:#D93025;
+    --g-yellow:#E37400;
+    --g-green:#1E8E3E;
+    --focus:var(--brand-2);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--sans-kakao);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+
+  /* ---------- shell ---------- */
+  .shell{display:grid;grid-template-columns:64px 1fr;min-height:100vh}
+
+  /* ---------- left rail ---------- */
+  .rail{
+    background:#F0F3FA;
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;
+    padding:18px 0;gap:6px;position:sticky;top:0;height:100vh;
+  }
+  .rail .mark{width:40px;height:auto;margin-bottom:22px;opacity:.95}
+  .rail .ritem{
+    width:40px;height:40px;border-radius:11px;
+    display:grid;place-items:center;color:var(--fog);
+    cursor:pointer;transition:.18s ease;position:relative;
+  }
+  .rail .ritem svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .rail .ritem:hover{color:var(--paper);background:var(--ink-3)}
+  .rail .ritem.on{color:var(--paper)}
+  .rail .ritem.on::before{
+    content:"";position:absolute;left:-18px;top:50%;transform:translateY(-50%);
+    width:2px;height:20px;background:var(--paper);border-radius:2px;
+  }
+  .rail .spacer{flex:1}
+  /* 테마 토글은 button 이라 브라우저 기본 스타일을 지워야 .ritem 과 같아진다 */
+  .rail button.ritem{border:none;background:none;padding:0;font:inherit;-webkit-appearance:none;appearance:none}
+  .rail .gc{width:26px;height:26px;opacity:.9;margin-top:6px}
+
+  /* ---------- main ---------- */
+  .main{min-height:100vh}
+  /* 허브(랜딩)에서만 히어로 + 패널 2열 분할.
+     13" 노트북(OS 배율 포함 CSS 폭 ~1024~1280)에서도 2열을 유지해야 한다.
+     좌우 패딩은 clamp 로 폭에 따라 줄고, 1열 붕괴는 900px 이하에서만. */
+  .main-split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,1fr)}
+  @media(max-width:900px){.main-split{grid-template-columns:1fr}}
+
+  /* ---------- hero ---------- */
+  .hero{
+    /* 왼쪽 히어로는 포인트 컬러(인디고)로 통짜 채운다 — 텍스트 계열 토큰을
+       이 안에서만 흰색 계열로 다시 정의한다(오른쪽 패널·다른 라우트는 그대로 화이트). */
+    --paper:#ffffff;
+    --fog:rgba(255,255,255,.68);
+    --fog-2:rgba(255,255,255,.88);
+    position:relative;padding:clamp(32px,4.6vw,56px) clamp(26px,4.8vw,60px);
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 80% at 20% 0%, color-mix(in srgb,var(--brand) 62%,white) 0%, var(--brand) 55%);
+    color:var(--paper);
+  }
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
+  /* header-logo-dot.svg 는 인디고 단색 마크라 인디고 배경 위에선 안 보인다 — 흰색으로 반전 */
+  .hero .eyebrow-logo{height:22px;width:auto;opacity:.95;filter:brightness(0) invert(1)}
+  .partners{display:flex;align-items:center;gap:13px}
+  .partners img.kakao{height:20px;opacity:.92}
+  .partners .x{color:var(--fog);font-size:13px;font-weight:300}
+  .partners img.gc{height:20px;opacity:.92}
+
+  .hero-body{margin:auto 0}
+  h1{
+    font-family:var(--sans-kakao);
+    font-weight:800;letter-spacing:-.01em;color:var(--paper);margin:0;
+  }
+  .hero-body h1.pitch{
+    font-size:clamp(40px,5.6vw,78px);line-height:1.28;
+  }
+  .hero-body h1.pitch .out{
+    color:transparent;-webkit-text-stroke:1.5px var(--paper);
+  }
+  .meta{
+    margin-top:38px;display:flex;gap:28px;
+    font-size:12px;color:var(--fog);letter-spacing:.04em;
+  }
+  .meta b{display:block;color:var(--paper);font-size:13px;font-weight:800;letter-spacing:0;margin-bottom:3px}
+
+  .sail-deco{
+    position:absolute;right:clamp(30px,4vw,60px);bottom:clamp(80px,11vh,120px);
+    display:flex;align-items:flex-end;gap:6px;pointer-events:none;
+  }
+  /* 항로(왼쪽)와 배(오른쪽)를 나란히 배치 — 겹치지 않게 flex 로 분리 */
+  .sail-deco .sail-route{
+    width:clamp(46px,5vw,300px);height:auto;opacity:.5;
+    transform: rotate(-20deg);
+  }
+  .sail-deco .sail-boat{
+    align-self:flex-start;
+    width:clamp(34px,3.6vw,48px);height:auto;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,.28));
+    transform: translateY(-16px) rotate(-10deg);
+  }
+
+  .footline{
+    margin-top:auto;padding-top:34px;display:flex;align-items:center;gap:10px;
+    font-size:11px;color:var(--fog);letter-spacing:.14em;text-transform:uppercase;
+  }
+  .footline img{height:16px;opacity:.75}
+
+  /* ---------- module panel ---------- */
+  .panel{
+    /* 카드뷰를 담는 배경도 회색으로 — 카드 자체는 흰색으로 띄운다 */
+    background:#F0F3FA;
+    padding:clamp(32px,4.2vw,52px) clamp(24px,4vw,52px) 40px;display:flex;flex-direction:column;
+  }
+  .panel-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+  .panel-head .t{font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--fog)}
+  .panel-head .c{font-size:12px;color:var(--fog);font-variant-numeric:tabular-nums}
+  .panel-sub{color:var(--fog-2);font-size:13px;font-weight:300;margin:0 0 30px;max-width:40ch;line-height:1.55}
+
+  .modules{display:flex;flex-direction:column;gap:16px}
+
+  .mod{
+    /* --accent-ink: 흰 배경 위 텍스트·아이콘용(대비 확보). --accent-on: accent 를 채웠을 때
+       그 위에 얹는 글자용. 기본은 accent 와 같지만, 옐로처럼 대비가 안 나오는 색은 모듈별로
+       따로 override 한다 (.mod.image 참고). */
+    --accent-ink:var(--accent);
+    --accent-on:var(--brand-on);
+    position:relative;display:flex;align-items:center;gap:clamp(14px,1.6vw,22px);
+    padding:clamp(18px,2vw,26px) clamp(18px,2.2vw,28px);border:1px solid var(--line);border-radius:18px;
+    background:#ffffff;
+    cursor:pointer;overflow:hidden;
+    transition:transform .28s cubic-bezier(.2,.7,.2,1),border-color .28s,background .28s;
+  }
+  .mod::before{ /* accent wash */
+    content:"";position:absolute;inset:0;opacity:0;transition:opacity .3s;
+    background:radial-gradient(80% 120% at 100% 0%, var(--accent) 0%, transparent 60%);
+  }
+  .mod::after{ /* left accent bar — 기본으로도 살짝 보이게, 호버 시 확장 */
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);
+    transition:width .28s cubic-bezier(.2,.7,.2,1);
+  }
+  .mod:hover{transform:translateY(-3px);border-color:var(--line-2);background:var(--ink-3)}
+  .mod:hover::before{opacity:.16}
+  .mod:hover::after{width:5px}
+  .mod:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+
+  .mod .glyph{
+    width:56px;height:56px;flex:0 0 56px;border-radius:15px;display:grid;place-items:center;
+    border:1px solid var(--line-2);background:var(--mod-bg);position:relative;z-index:1;
+    transition:.28s;
+  }
+  .mod:hover .glyph{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 12%,transparent)}
+  .mod .glyph svg{width:27px;height:27px;stroke:var(--accent-ink);fill:none;stroke-width:1.5}
+  .mod .txt{position:relative;z-index:1;flex:1;min-width:0}
+  .mod .txt .en{font-size:11px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:7px}
+  .mod .txt h3{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  /* 설명 문구는 카드 폭을 그대로 쓴다. 예전엔 max-width:42ch 로 카드보다 훨씬 좁게 잘려
+     한글 문장이 어색하게 두 줄로 접혔다. 아주 넓은 화면에서만 가독성 위해 상한. */
+  .mod .txt p{margin:6px 0 0;font-size:13px;color:var(--fog-2);font-weight:300;line-height:1.5;max-width:62ch}
+  .mod .txt .api{
+    display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+    font-size:11px;color:var(--fog);letter-spacing:.03em;
+  }
+  .mod .txt .api img{height:13px;opacity:.7}
+  .mod .go{
+    position:relative;z-index:1;width:44px;height:44px;flex:0 0 44px;border-radius:50%;
+    border:1px solid var(--line-2);display:grid;place-items:center;color:var(--fog-2);
+    transition:.28s;
+  }
+  .mod .go svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .mod:hover .go{background:var(--accent);border-color:var(--accent);color:var(--accent-on);transform:translateX(3px)}
+
+  .mod.video{--accent:var(--brand-2)}
+  .mod.image{--accent:var(--brand-yellow);--accent-ink:var(--brand-yellow-ink);--accent-on:var(--brand-yellow-ink)}
+  .mod.audio{--accent:var(--brand-2)}
+
+  .panel-foot{
+    margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;color:var(--fog);letter-spacing:.06em;
+  }
+  .panel-foot .pill{display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+  .panel-foot .pill .d{width:6px;height:6px;border-radius:50%;background:var(--g-green)}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}
+  .d4{animation-delay:.26s}.d5{animation-delay:.33s}.d6{animation-delay:.40s}
+  @media(prefers-reduced-motion:reduce){.reveal{animation:none;opacity:1;transform:none}
+    .mod,.mod .go,.mod::after{transition:none}}
+
+  /* 2열이 1열로 붕괴하는 지점 (.main-split 과 동일: 900px). 히어로 테두리를 오른쪽→아래로. */
+  @media(max-width:900px){
+    .hero{border-right:none;border-bottom:1px solid var(--line);padding:40px 30px 46px}
+    .panel{padding:40px 30px}
+    .hero::after{width:360px;right:-90px;bottom:-70px}
+  }
+  @media(max-width:620px){
+    .shell{grid-template-columns:52px 1fr}
+    .rail{padding:14px 0}
+    .hero-top{flex-direction:column;align-items:flex-start;gap:16px}
+    .hero{padding:34px 22px 40px}
+    .panel{padding:34px 22px}
+    h1{font-size:clamp(38px,13vw,60px)}
+    .lede{font-size:14px}
+    .meta{flex-wrap:wrap;gap:18px 26px}
+    .mod{padding:20px 18px;gap:16px;align-items:flex-start}
+    .mod .glyph{width:46px;height:46px;flex-basis:46px}
+    .mod .glyph svg{width:22px;height:22px}
+    .mod .txt h3{font-size:19px}
+    .mod .txt p{font-size:12.5px}
+    .mod .go{width:38px;height:38px;flex-basis:38px;align-self:center}
+    .panel-foot{flex-direction:column;gap:12px;align-items:flex-start}
+  }
+
+/* 스타터 템플릿의 #root 고정폭·가운데정렬을 이 앱 레이아웃용으로 되돌린다 */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+  border-inline: none;
+  display: block;
+}
+
+/* ---------- 준비 중 스튜디오 자리표시자 ---------- */
+.soon {
+  --accent: var(--brand-2);
+  --accent-ink: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--ink-2);
+  padding: 44px 40px;
+  max-width: 560px;
+}
+.soon.video { --accent: var(--brand-2) }
+.soon.image { --accent: var(--brand-yellow); --accent-ink: var(--brand-yellow-ink) }
+.soon.audio { --accent: var(--brand-2) }
+
+.soon h2 {
+  margin: 0 0 12px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--accent-ink);
+}
+.soon > p {
+  margin: 0 0 18px;
+  color: var(--fog-2);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.6;
+}
+.soon .api {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--fog);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 11px;
+}
+.soon .api img { width: 13px; height: 13px }
+
+.soon-note {
+  margin: 26px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--fog);
+}
+.soon-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--fog-2);
+  transition: color 0.2s;
+}
+.soon-back:hover { color: var(--paper) }
+.soon-back svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  transform: rotate(180deg);
+}
+
+/* ---------- 스튜디오 진입 동의 게이트 ---------- */
+.consent-scrim {
+  --accent: var(--brand-2);
+  --accent-ink: var(--accent);
+  --accent-on: var(--brand-on);
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--ink) 78%, transparent);
+  backdrop-filter: blur(3px);
+}
+.consent-scrim.video { --accent: var(--brand-2); }
+.consent-scrim.image {
+  --accent: var(--brand-yellow);
+  --accent-ink: var(--brand-yellow-ink);
+  --accent-on: var(--brand-yellow-ink);
+}
+.consent-scrim.audio { --accent: var(--brand-2); }
+
+.consent-card {
+  width: min(460px, 100%);
+  border: 1px solid var(--line-2);
+  border-radius: 16px;
+  background: var(--ink-2);
+  padding: 30px 30px 24px;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+  animation: consent-rise 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes consent-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.consent-card h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--accent-ink);
+}
+
+.consent-body p {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  line-height: 1.62;
+  color: var(--fog-2);
+  font-weight: 300;
+}
+.consent-body p:last-child { margin-bottom: 0; }
+.consent-body b { color: var(--paper); font-weight: 600; }
+
+.consent-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 0 22px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--ink-3);
+  font-size: 13px;
+  color: var(--fog-2);
+  cursor: pointer;
+}
+.consent-check input {
+  margin-top: 1px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.consent-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.consent-actions button {
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+}
+.consent-cancel {
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--fog-2);
+}
+.consent-cancel:hover { border-color: var(--fog); color: var(--paper); }
+.consent-go {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-on);
+  font-weight: 600;
+}
+.consent-go:disabled {
+  background: var(--ink-3);
+  border-color: var(--line-2);
+  color: var(--fog);
+  cursor: not-allowed;
+}
+.consent-actions button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consent-card { animation: none; }
+}

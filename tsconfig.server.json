@@ -1,0 +1,24 @@
+{
+  /* 개발용 tsconfig.node.json 은 noEmit 이다 (타입체크 전용).
+   * 배포에는 실제로 .js 를 뽑아야 하므로 emit 설정을 따로 둔다.
+   * rewriteRelativeImportExtensions 가 './api.ts' 를 './api.js' 로 바꿔준다. */
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "outDir": "./dist-server",
+    "rootDir": "./server"
+  },
+  "include": ["server"]
+}

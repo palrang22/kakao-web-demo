@@ -1,0 +1,1709 @@
+/* 스튜디오 3종의 공통 셸.
+ * hub.css 가 :root 에 깔아둔 디자인 토큰으로 재매핑해서 시안과 톤을 맞춘다.
+ * 강조색은 시안의 .mod.video / .image / .audio 와 같은 규칙 — 모듈당 하나씩.
+ */
+.studio {
+  --text: var(--fog-2);
+  --text-h: var(--paper);
+  --bg: var(--ink-2);
+  --border: var(--line);
+  --code-bg: var(--ink-3);
+  --social-bg: var(--ink-2);
+  --accent-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-border: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Google 4색 대신 카카오 브랜드 톤. video/audio 는 같은 블루로 통일(합의됨).
+   image 는 순색 옐로(#FAE300) 대신 카카오 브라운을 쓴다 — 이 파일 전체에서 --accent 를
+   텍스트·보더·아이콘 색으로도 광범위하게 재사용하는데, 순색 옐로는 흰 배경 대비가
+   거의 없어(1.1:1) 곳곳에서 안 보이는 텍스트가 생긴다. 브라운은 어디서나 대비가 확보된다. */
+.studio.video { --accent: var(--brand-2); }
+.studio.image { --accent: var(--brand-yellow-ink); }
+.studio.audio { --accent: var(--brand-2); }
+
+/* 스타터 템플릿에 전역 box-sizing 리셋이 없어서 이 페이지 범위에만 건다 */
+.studio,
+.studio *,
+.studio *::before,
+.studio *::after {
+  box-sizing: border-box;
+}
+
+.studio {
+  max-width: 860px;
+  margin: 0;
+  padding: 52px 52px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.studio-header .panel-head {
+  margin-bottom: 14px;
+}
+
+.studio-header h1 {
+  color: var(--accent);
+  font-size: 1.9rem;
+  line-height: 1.2;
+  margin: 0 0 0.4rem;
+}
+
+.studio-header p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+code {
+  font: 0.85em var(--mono);
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+}
+
+/* ── 배너 ───────────────────────────────────────── */
+.banner {
+  position: relative;
+  padding: 0.9rem 2.4rem 0.9rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  white-space: pre-line; /* 에러 메시지의 힌트를 줄바꿈해서 보여준다 */
+}
+
+.banner strong {
+  color: var(--text-h);
+}
+
+.banner-warn {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.banner-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.banner-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* ── 결과 타임라인 ──────────────────────────────── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.turn {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--social-bg);
+}
+
+.turn-meta {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  align-items: baseline;
+}
+
+.turn-meta p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-h);
+}
+
+.turn-index {
+  font: 0.75rem var(--mono);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.turn-video {
+  display: block;
+  width: 100%;
+  max-height: 460px;
+  background: #000;
+}
+
+.turn-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+}
+
+.turn-actions a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.turn-actions code {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.download-qr {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.qr-toggle {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.qr-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  max-width: calc(100vw - 2rem);
+}
+
+/* 좁은 화면에서 320px QR 이 뷰포트를 넘지 않게 축소 (260px 까지는 디코딩 확인됨) */
+@media (max-width: 420px) {
+  .qr-canvas,
+  .qr-canvas canvas,
+  .qr-popover .qr-loading {
+    width: 260px !important;
+    height: 260px !important;
+    min-width: 0;
+  }
+}
+
+/* qr-code-styling 이 canvas 를 여기 append 한다. 생성은 2배 해상도(640px)로
+   뜨고 표시만 320px 로 줄여 레티나에서도 또렷하게. 흰 배경 + 패딩은 quiet zone. */
+.qr-canvas {
+  width: 320px;
+  height: 320px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-canvas[data-status="rendering"] {
+  opacity: 0.4;
+}
+
+.qr-canvas canvas {
+  width: 320px !important;
+  height: 320px !important;
+  display: block;
+}
+
+.qr-popover .qr-loading {
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+.qr-popover .qr-save {
+  margin-left: 0;
+}
+
+.qr-popover span:not(.qr-loading) {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+/* 서명 URL 생성 실패 — "오류 보기" 로 원본 에러를 새 탭에 띄운다 */
+.qr-fail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+  text-align: center;
+}
+
+.qr-fail .banner-detail {
+  margin-left: 0;
+}
+
+/* ── 입력부 ─────────────────────────────────────── */
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+/* 프롬프트 입력창 바로 위 — "텍스트만 써도 되고 사진도 같이 올릴 수 있다"를
+   한눈에 보이게 한다. 예전엔 이미지 버튼이 하단 옵션 줄에 작게 끼어 있어서
+   눈에 잘 안 띈다는 피드백으로 옮김. */
+.composer-attach {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.composer-attach .hint {
+  font-size: 0.82rem;
+  opacity: 0.7;
+}
+
+.attach-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 9px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+.attach-cta:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.attach-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0.75rem;
+}
+
+textarea:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.examples button {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.examples button:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* ── 컨셉 칸 — 옷 고르기 (2벌 이상일 때) ─────────
+   옷은 컨셉당 많아야 2벌(상/하 또는 대안 2종)이라, 좁은 그리드 대신
+   칸을 위아래로 꽉 채워 크게 보여준다. */
+.concept-outfits {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.9rem 0.6rem 0.6rem;
+  overflow-y: auto;
+}
+.concept-outfits-hint {
+  flex: none;
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text);
+  text-align: center;
+}
+.concept-outfit-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  /* 옷을 가로로 나란히 — 열은 개수만큼 자동으로 늘고 폭은 균등하게 나눈다 */
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  grid-auto-rows: 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 0.5rem;
+}
+.concept-outfit {
+  position: relative;
+  /* 칸 안에서 사진을 가운데로 — 위 justify/align-items 가 버튼을 가운데 두고,
+     아래 object-fit:contain 이 사진을 버튼 안에서 다시 가운데 맞춘다 */
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.16s ease;
+}
+.concept-outfit img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.concept-outfit:hover:not(:disabled) {
+  border-color: var(--accent-border);
+}
+.concept-outfit.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+}
+
+.attachments {
+  display: flex;
+  gap: 0.5rem;
+  /* 10 장까지 붙으므로 한 줄을 넘기면 접는다 */
+  flex-wrap: wrap;
+}
+
+/* 장면 확장 모드 — 지금 어느 영상 뒤에 붙는지 알려준다 */
+.extend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--g-red);
+  border-radius: 8px;
+  background: var(--ink-2);
+  color: var(--fog);
+  font-size: 0.85rem;
+}
+
+.extend-bar strong {
+  color: var(--paper);
+}
+
+.extend-bar button {
+  flex-shrink: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  color: var(--fog-2);
+  cursor: pointer;
+}
+
+.extend-bar button:hover {
+  color: var(--paper);
+  border-color: var(--line);
+}
+
+.extend-cta {
+  border: 1px solid var(--g-red);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  color: var(--g-red);
+  cursor: pointer;
+}
+
+.extend-cta:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.turn-length {
+  color: var(--fog-2);
+  font-size: 0.8rem;
+}
+
+.turn-maxed {
+  color: var(--fog-2);
+  font-size: 0.8rem;
+}
+
+.attachment {
+  position: relative;
+  width: 68px;
+  height: 68px;
+}
+
+.attachment img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.attachment button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.controls select {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.duration input {
+  width: 90px;
+  accent-color: var(--accent);
+}
+
+.cost {
+  font: 0.78rem var(--mono);
+  opacity: 0.7;
+  margin-left: auto;
+}
+
+.controls button {
+  font: inherit;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.controls .primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── 진행 표시 ──────────────────────────────────── */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.elapsed {
+  font: 0.78rem var(--mono);
+  color: var(--accent);
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--accent-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.5s;
+  }
+}
+
+/* ---------- 02 Look Studio ---------- */
+/* 인물·의상(컨셉) 칸을 바깥 너비에 흩어지지 않게 한 쌍으로 묶어 가운데 정렬하고
+   사이에 + 를 둔다. grid 1fr 시절엔 칸이 각 열 왼쪽으로 쏠려 보였다. */
+.slots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.slots > .slot {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 285px;
+}
+.slot-plus {
+  flex: none;
+  font-size: 1.4rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--text);
+  opacity: 0.55;
+  user-select: none;
+}
+
+@media (max-width: 640px) {
+  .slots {
+    flex-direction: column;
+  }
+  .slots > .slot {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.slot {
+  position: relative;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--code-bg);
+  aspect-ratio: 3 / 4;
+  max-height: 380px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.slot.filled {
+  border-style: solid;
+  border-color: var(--accent-border);
+}
+
+.slot-label {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  z-index: 1;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slot-pick {
+  width: 100%;
+  height: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  transition: 0.18s ease;
+}
+
+.slot-pick:hover:not(:disabled) {
+  color: var(--text-h);
+  background: var(--accent-bg);
+}
+
+.slot-pick .plus {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.slot-clear {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--ink) 80%, transparent);
+  color: var(--paper);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.results-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.result {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.result img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 60vh;
+  margin: 0 auto;
+}
+
+.result .turn-actions {
+  padding: 0.6rem 0.9rem;
+  flex-wrap: wrap;
+}
+
+/* ── 결과 액션 줄 ──────────────────────────────── */
+.turn-actions .continue-btn {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-right: auto;
+}
+
+/* "내 PC에 다운로드" / "QR로 다운로드" — 같은 모양의 버튼 두 개 */
+.turn-actions .result-dl {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.turn-actions .result-dl:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+/* ── 인물 슬롯 — [샘플에서 고르기] / [사진 찍기] ── */
+.person-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.person-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.95rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+
+.person-choice:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  color: var(--text-h);
+  background: var(--accent-bg);
+}
+
+.person-choice:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.person-choice .ico {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.person-cam-error {
+  margin: 0.6rem 1rem 0;
+  font-size: 0.78rem;
+  color: var(--g-red);
+  text-align: center;
+}
+
+/* 슬롯을 꽉 채우는 웹캠 미리보기 */
+.slot-cam {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  transform: scaleX(-1); /* 거울 모드 */
+}
+
+.slot-cam-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.7rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
+}
+
+.slot-cam-actions button {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  cursor: pointer;
+}
+
+.slot-cam-actions button.shoot {
+  font-weight: 600;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── 선택한 의상 미리보기 (인물 옆 칸) ─────────── */
+.garment-empty {
+  margin: 0;
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+.garment-empty span {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.garment-chosen-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  gap: 2px;
+}
+.garment-chosen-grid[data-count="1"] {
+  grid-template-columns: 1fr;
+}
+.garment-chosen-grid[data-count="2"] {
+  grid-template-columns: 1fr 1fr;
+}
+.garment-chosen-item {
+  position: relative;
+  overflow: hidden;
+}
+.garment-chosen-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.garment-chosen-item .slot-clear {
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+}
+
+/* ── 샘플 의상 고르기 (폴더별 섹션 · 스크롤) ───── */
+.garment-picker {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--code-bg);
+  overflow: hidden;
+}
+
+.garment-picker-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.garment-picker-head span {
+  letter-spacing: 0.04em;
+}
+.garment-upload {
+  margin-left: auto;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.garment-upload:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+.garment-upload:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.garment-note {
+  margin: 0;
+  padding: 0.5rem 0.9rem 0;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.garment-scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 0.4rem 0.9rem 0.9rem;
+}
+
+.garment-section + .garment-section {
+  margin-top: 0.5rem;
+}
+.garment-section h4 {
+  margin: 0.7rem 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.garment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  gap: 0.5rem;
+}
+
+.garment-cell {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.garment-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.garment-cell:hover:not(:disabled) {
+  border-color: var(--accent-border);
+}
+.garment-cell:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.garment-cell.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+}
+
+.garment-check {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.garment-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.55rem 0.4rem 0.28rem;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 샘플 인물 팝업 (3 × 2) ───────────────────── */
+.sample-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.sample-modal-panel {
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.sample-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sample-modal-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-h);
+}
+
+.sample-modal-close {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.sample-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .sample-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.sample-cell {
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--ink-3);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.16s ease;
+}
+
+.sample-cell img {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  object-fit: cover;
+}
+
+.sample-cell span {
+  padding: 0.35rem;
+  font-size: 0.78rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+
+.sample-cell:hover:not(:disabled) {
+  border-color: var(--accent-border);
+}
+
+.sample-cell:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ---------- 03 Voice Studio ---------- */
+.voice-cam-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--border);
+}
+
+.voice-cam {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* 거울 모드 */
+}
+
+.voice-cam-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.voice-cam-badge.pending {
+  color: var(--text-h);
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
+  border: 1px solid var(--accent-border);
+}
+
+.chat-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-row input {
+  flex: 1;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0.6rem 0.75rem;
+}
+
+.chat-row input:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}
+
+.chat-row button {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+
+.chat-row button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 2rem 0 1.4rem;
+}
+
+.mic-button {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.mic-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.mic-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 연결되어 있는 동안만 맥동한다 */
+.mic.live .mic-button {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+/* 손님 목소리를 잡고 있는 중 — 서버의 voiceActivity 로만 켜진다 (마이크가 살아있다는 증거) */
+.mic.hearing .mic-button {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  animation-duration: 0.9s;
+}
+
+/* 관상가가 말하는 중 — 이때 손님 마이크는 닫혀 있다 */
+.mic.speaking .mic-button {
+  animation: none;
+  opacity: 0.72;
+}
+
+.mic.connecting .mic-button {
+  display: grid;
+  place-items: center;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-bg); }
+  50% { box-shadow: 0 0 0 14px transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mic.live .mic-button { animation: none; }
+}
+
+.mic-state {
+  font-size: 0.88rem;
+  color: var(--text-h);
+}
+
+.hint-note {
+  font-size: 0.76rem;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.transcript {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.transcript .line {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.transcript .line.model {
+  color: var(--text-h);
+}
+
+/* 아직 확정되지 않은 자막 — 말하는 대로 뜨고, 확정되면 위 줄로 대체된다 */
+.transcript .line.interim {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.transcript .who {
+  display: inline-block;
+  min-width: 3.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+/* ---------- 관리자 ---------- */
+.studio.admin { --accent: var(--g-green); }
+
+.gate {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 2.4rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: center;
+  max-width: 380px;
+}
+
+.gate-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  margin-bottom: 0.3rem;
+}
+
+.gate-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.6;
+}
+
+.gate h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-h);
+}
+
+.gate p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.gate input {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.gate input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.gate-error {
+  color: var(--g-red);
+  font-size: 0.8rem;
+}
+
+/* studio.css 의 .primary 는 .controls 안에만 걸려 있어서 여기선 안 먹는다 */
+.gate button {
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  transition: 0.18s ease;
+}
+
+.gate button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.gate button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 에러 배너의 "에러코드 확인하기" — 원본 에러를 새 탭에서 연다 */
+.banner-detail {
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.banner-detail:hover {
+  opacity: 1;
+}
+
+/* ---------- Media Gallery (§4) ---------- */
+.studio.gallery {
+  --accent: var(--g-green);
+  max-width: none;
+  padding: 0;
+  gap: 0;
+  position: relative;
+  height: 100vh;
+  /* 모바일 브라우저에서 100vh 는 주소창에 가린 높이까지 포함해 실제 보이는 화면보다 크다.
+     dvh 를 아는 브라우저는 이 줄이 이기고, 모르는 브라우저는 위 vh 로 남는다. */
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+
+.gallery-msg {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--fog);
+}
+.gallery-note {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  max-width: 32rem;
+}
+
+.gallery-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+/* 크로스페이드 레이어 — 스택으로 겹쳐두고 앞 레이어만 페이드 인 */
+.gallery-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  will-change: opacity, transform;
+}
+.gallery-layer.back {
+  z-index: 1;
+  animation: gallery-out 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.gallery-layer.front {
+  z-index: 2;
+  animation: gallery-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes gallery-in {
+  from {
+    opacity: 0;
+    transform: scale(1.035);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes gallery-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+.gallery-media {
+  /* 레이어를 꽉 채우고 내용만 비율대로 맞춘다.
+     예전엔 max-width/max-height: 100% 였는데, 레이어가 display:grid 에 행 높이가 auto 라
+     그리드 아이템의 퍼센트 높이가 해석되지 않아 max-height 가 통째로 무시됐다.
+     그래서 세로 영상이 원본 높이 그대로 나오고 아랫부분이 잘렸다 (작은 화면일수록 심함). */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 정지 이미지엔 느린 켄번스 드리프트 — 전시대에서 "살아있는" 느낌.
+   12s 로 잡아 노출 시간(IMAGE_MS 5s) 안에 끝나지 않으므로 튐 없음. 영상엔 안 건다.
+   front/back 공통 선택자 — 떠나는 이미지도 페이드 도중 드리프트를 이어간다(스냅 방지). */
+.gallery-layer img.gallery-media {
+  animation: gallery-kenburns 12s ease-out forwards;
+}
+@keyframes gallery-kenburns {
+  from {
+    transform: scale(1) translateY(0);
+  }
+  to {
+    transform: scale(1.09) translateY(-1.8%);
+  }
+}
+
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.24s ease,
+    background 0.16s ease;
+}
+.gallery-nav.on {
+  opacity: 0.7;
+}
+.gallery-nav:hover {
+  background: rgba(0, 0, 0, 0.68);
+  opacity: 1;
+}
+.gallery-nav.prev {
+  left: 1.2rem;
+}
+.gallery-nav.next {
+  right: 1.2rem;
+}
+.gallery-nav svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+.gallery-nav.prev svg {
+  transform: rotate(180deg);
+}
+
+.gallery-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* .gallery-layer.front 가 z-index:2 로 화면 전체(inset:0)를 덮는다.
+     여기에 z-index 가 없으면 바가 보이기는 해도 클릭은 그 레이어가 먹는다 — 삭제 버튼이 안 눌렸다. */
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.4rem;
+  font-size: 0.85rem;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
+  transform: translateY(100%);
+  transition: transform 0.28s ease;
+}
+.gallery-bar.on {
+  transform: translateY(0);
+}
+.gallery-kind,
+.gallery-when {
+  opacity: 0.7;
+}
+.gallery-del {
+  margin-left: auto;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.gallery-del:hover:not(:disabled) {
+  background: var(--g-red);
+  border-color: var(--g-red);
+}
+.gallery-del:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 삭제 확인 — 복구 불가 안내 */
+.gallery-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+}
+.gallery-confirm-card {
+  max-width: 22rem;
+  width: 100%;
+  padding: 1.6rem 1.5rem 1.3rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  text-align: center;
+}
+.gallery-confirm-title {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+.gallery-confirm-sub {
+  margin: 0 0 1.2rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.gallery-confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+.gallery-confirm-actions button {
+  flex: 1;
+  padding: 0.55rem 1rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.gallery-confirm-yes {
+  background: var(--g-red);
+  color: #fff;
+}
+.gallery-confirm-yes:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.gallery-confirm-no {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-h);
+}
+.gallery-confirm-no:hover:not(:disabled) {
+  border-color: var(--text);
+}
+.gallery-confirm-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-layer.front {
+    animation: gallery-fade 0.3s ease forwards;
+  }
+  .gallery-layer.back {
+    animation: gallery-fade 0.3s ease reverse forwards;
+  }
+  .gallery-layer img.gallery-media {
+    animation: none;
+  }
+  @keyframes gallery-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .gallery-bar,
+  .gallery-nav {
+    transition: none;
+  }
+}
