@@ -319,7 +319,7 @@
   .mod:hover .go{background:var(--accent);border-color:var(--accent);color:var(--accent-on);transform:translateX(3px)}
 
   .mod.video{--accent:var(--brand-2)}
-  .mod.image{--accent:var(--brand-yellow);--accent-ink:var(--brand-yellow-ink);--accent-on:var(--brand-yellow-ink)}
+  .mod.image{--accent:var(--brand-yellow);--accent-ink:var(--brand-2);--accent-on:var(--brand-2)}
   .mod.audio{--accent:var(--brand-2)}
 
   .panel-foot{
@@ -461,11 +461,7 @@
   backdrop-filter: blur(3px);
 }
 .consent-scrim.video { --accent: var(--brand-2); }
-.consent-scrim.image {
-  --accent: var(--brand-yellow);
-  --accent-ink: var(--brand-yellow-ink);
-  --accent-on: var(--brand-yellow-ink);
-}
+.consent-scrim.image { --accent: var(--brand-2); }
 .consent-scrim.audio { --accent: var(--brand-2); }
 
 .consent-card {

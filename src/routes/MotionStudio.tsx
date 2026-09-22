@@ -640,7 +640,7 @@ export function MotionStudio() {
           </label>
 
           <span className="cost">
-            ≈ ${priceFor(resolution, duration).toFixed(2)}
+            
           </span>
 
           <button

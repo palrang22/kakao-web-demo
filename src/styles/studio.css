@@ -20,7 +20,7 @@
    텍스트·보더·아이콘 색으로도 광범위하게 재사용하는데, 순색 옐로는 흰 배경 대비가
    거의 없어(1.1:1) 곳곳에서 안 보이는 텍스트가 생긴다. 브라운은 어디서나 대비가 확보된다. */
 .studio.video { --accent: var(--brand-2); }
-.studio.image { --accent: var(--brand-yellow-ink); }
+.studio.image { --accent: var(--brand-2); }
 .studio.audio { --accent: var(--brand-2); }
 
 /* 스타터 템플릿에 전역 box-sizing 리셋이 없어서 이 페이지 범위에만 건다 */
