@@ -58,22 +58,6 @@ const MAX_TOTAL_SECONDS = 40;
 const MIN_DURATION = 3;
 const RESOLUTIONS = ["360p", "720p", "1080p"] as const;
 
-/**
- * 해상도별 초당 단가(USD).
- *
- * 출력 토큰이 해상도마다 다르다 — 360p 1,931 / 720p 5,792 / 1080p 8,688 토큰/초.
- * 720p 실측가 $0.10/초를 기준으로 토큰 비율만큼 환산한 값이다.
- * 정확한 청구액은 콘솔에서 확인할 것. 4k(17,376 토큰/초, 약 $0.30)는 부스에서
- * 비용이 튀므로 선택지에 넣지 않았다.
- */
-const PRICE_PER_SECOND: Record<string, number> = {
-  "360p": 0.033,
-  "720p": 0.1,
-  "1080p": 0.15,
-};
-
-const priceFor = (resolution: string, seconds: number) =>
-  seconds * (PRICE_PER_SECOND[resolution] ?? 0.1);
 
 /** 길이 슬라이더 라벨 — 확장 모드면 붙인 뒤 총 길이도 같이 보여준다 */
 function extendSuffix(extendFrom: Turn | null, duration: number): string {
