@@ -29,3 +29,6 @@ output
 
 # 샘플 이미지 원본 PNG 백업 (public/samples/ 는 webp 로 최적화됨 — scripts/optimize-samples.mjs)
 samples-original
+
+# 블로그 원고용 브리프 (외부 전달 자료 — 레포에 남기지 않는다)
+docs/blog
