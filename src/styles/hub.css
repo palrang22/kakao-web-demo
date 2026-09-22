@@ -136,37 +136,22 @@
     display:flex;align-items:center;justify-content:space-between;gap:16px;
   }
   .hero .eyebrow-logo{height:22px;width:auto;filter:brightness(0) invert(1);opacity:.95}
-  .hero-top .partners{
-    display:flex;align-items:center;gap:10px;
-    padding:6px 14px;
-    background:rgba(255,255,255,.07);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,.14);
-    border-radius:999px;
-  }
-  .hero-top .partners img.kakao{height:16px;width:auto;display:block}
-  .hero-top .partners .x{color:rgba(255,255,255,.45);font-size:11px;font-weight:300}
-  .hero-top .partners img.gc{height:15px;width:auto;display:block}
 
   /* ---------- hero 본문 ---------- */
   .hero-body{position:relative;z-index:1;margin:auto 0;padding:clamp(28px,4vw,48px) 0}
 
-  /* 키커 — 얇은 아웃라인 칩. 옐로는 앞의 점 하나만 */
+  /* 키커 — 얇은 아웃라인 칩. 헤더 오른쪽(구 파트너 칩 자리)에 둔다 */
   .hero-kicker{
-    display:inline-flex;align-items:center;gap:9px;
-    padding:7px 15px 7px 12px;
+    display:inline-flex;align-items:center;
+    /* letter-spacing 은 마지막 글자 뒤에도 붙어서 오른쪽만 넓어 보인다.
+       그만큼 오른쪽 패딩에서 빼 좌우 여백을 눈으로 맞춘다 */
+    padding:7px calc(15px - .17em) 7px 15px;
     border:1px solid rgba(255,255,255,.20);
     border-radius:999px;
     background:rgba(255,255,255,.05);
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
     font-size:11px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
     color:rgba(255,255,255,.86);
-    margin-bottom:clamp(20px,2.2vw,28px);
-  }
-  .hero-kicker .dot{
-    width:6px;height:6px;border-radius:50%;flex:none;
-    background:var(--brand-yellow);
-    box-shadow:0 0 0 3px rgba(250,227,0,.18);
   }
 
   /* 캐치프레이즈 — 1행은 눌러서, 2행은 화이트 볼드로 세운다 */
@@ -183,11 +168,13 @@
     display:inline-flex;align-items:flex-end;width:fit-content;
     font-weight:800;color:#ffffff;
   }
-  /* 문장 끝 옐로 점 — 히어로에서 옐로를 쓰는 두 곳 중 하나 */
+  /* 문장 끝 옐로 점 — 히어로에서 옐로를 쓰는 두 곳 중 하나.
+     아래 여백은 '항해' 글리프의 실제 잉크 바닥(베이스라인 아래 .087em)에
+     점의 아랫변을 맞춘 값이다. em 이라 폰트 크기가 변해도 유지된다 */
   h1.pitch .l2 .tip{
     width:.15em;height:.15em;border-radius:50%;flex:none;
     background:var(--brand-yellow);
-    margin:0 0 .2em .16em;
+    margin:0 0 .1em .15em;
   }
 
   /* 캐치프레이즈 아래 얇은 블루 룰 */
@@ -330,7 +317,7 @@
     .hero-top{flex-direction:column;align-items:flex-start;gap:12px}
     .hero{padding:26px 16px 36px}
     .panel{padding:28px 16px}
-    .hero-kicker{font-size:10px;letter-spacing:.14em;margin-bottom:14px;padding:6px 12px 6px 10px}
+    .hero-kicker{font-size:10px;letter-spacing:.14em;padding:6px calc(12px - .14em) 6px 12px}
     h1.pitch{font-size:clamp(28px,8.5vw,40px);line-height:1.2}
     .hero-body .hero-desc{font-size:13px;margin-top:18px;padding-top:16px}
     .hero-desc{line-height:1.6}

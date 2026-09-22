@@ -58,31 +58,18 @@ export function Hub() {
         {/* 배경 — 돛단배 라인 드로잉 + 물결 */}
         <SailArt />
 
-        {/* 상단 로고 & 파트너십 */}
+        {/* 상단 로고 & 행사 키커 */}
         <div className="hero-top reveal d1">
           <img
             className="eyebrow-logo"
             src="/header-logo-dot.svg"
             alt="Kakao AI 돛"
           />
-          <div className="partners">
-            <img className="kakao" src="/kakao-logo-yellow.png" alt="Kakao" />
-            <span className="x">×</span>
-            <img
-              className="gc"
-              src="/Google_Cloud_icon.svg"
-              alt="Google Cloud"
-            />
-          </div>
+          <span className="hero-kicker">AI 돛 Summit 26</span>
         </div>
 
-        {/* 본문: 키커 → 캐치프레이즈 → 설명 → 메타 */}
+        {/* 본문: 캐치프레이즈 → 설명 → 메타 */}
         <div className="hero-body">
-          <span className="hero-kicker reveal d2">
-            <i className="dot" aria-hidden="true" />
-            AI 돛 Summit 26
-          </span>
-
           <h1 className="pitch reveal d3">
             <span className="l1">미래를 향해,</span>
             <span className="l2">
