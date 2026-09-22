@@ -5,6 +5,7 @@ import {
   ImageIcon,
   VideoIcon,
 } from "../components/Icons.tsx";
+import { SailArt } from "../components/SailArt.tsx";
 
 type Studio = {
   to: string;
@@ -54,11 +55,15 @@ export function Hub() {
   return (
     <>
       <section className="hero">
+        {/* 배경 — 돛단배 라인 드로잉 + 물결 */}
+        <SailArt />
+
+        {/* 상단 로고 & 파트너십 */}
         <div className="hero-top reveal d1">
           <img
             className="eyebrow-logo"
             src="/header-logo-dot.svg"
-            alt="Kakao AI 돛 Summit 26"
+            alt="Kakao AI 돛"
           />
           <div className="partners">
             <img className="kakao" src="/kakao-logo-yellow.png" alt="Kakao" />
@@ -71,37 +76,53 @@ export function Hub() {
           </div>
         </div>
 
+        {/* 본문: 키커 → 캐치프레이즈 → 설명 → 메타 */}
         <div className="hero-body">
-          <h1 className="pitch reveal d2">
-            미래를 <span className="out">향해</span>,
-            <br />
-            <span className="out">가능성</span>의 항해
+          <span className="hero-kicker reveal d2">
+            <i className="dot" aria-hidden="true" />
+            AI 돛 Summit 26
+          </span>
+
+          <h1 className="pitch reveal d3">
+            <span className="l1">미래를 향해,</span>
+            <span className="l2">
+              가능성의 항해
+              <i className="tip" aria-hidden="true" />
+            </span>
           </h1>
-          <div className="meta reveal d4">
-            <div>
-              <b>2026.09.29</b>Tue
+
+          <p className="hero-desc reveal d4">
+            생성형 AI 멀티모달 모델을 직접 다뤄보는 인터랙티브 미디어 부스.
+            영상·이미지·음성 세 개의 스튜디오가 준비되어 있습니다.
+          </p>
+
+          <dl className="hero-meta reveal d5">
+            <div className="meta-item">
+              <dt>일시</dt>
+              <dd>
+                2026.09.29 <span className="dim">(화)</span>
+              </dd>
             </div>
-            <div>
-              <b>BPEX</b>Busan
+            <div className="meta-item">
+              <dt>장소</dt>
+              <dd>부산 BPEX</dd>
             </div>
-            <div>
-              <b>3 Studios</b>Video · Image · Audio
+            <div className="meta-item">
+              <dt>체험</dt>
+              <dd>3 Studios</dd>
             </div>
-          </div>
+          </dl>
         </div>
 
-        <div className="sail-deco reveal d5" aria-hidden="true">
-          <img className="sail-route" src="/sail-route.svg" alt="" />
-          <img className="sail-boat" src="/sailing-boat-white.png" alt="" />
-        </div>
-
-        <div className="footline reveal d5">
+        {/* 하단 푸터 */}
+        <div className="footline reveal d6">
           <span>Powered by</span>
           <img src="/Google_Cloud_icon.svg" alt="Google Cloud" />
-          <span style={{ letterSpacing: ".14em" }}>Google Cloud</span>
+          <span className="powered-name">Google Cloud</span>
         </div>
       </section>
 
+      {/* 오른쪽 스튜디오 패널 (유지) */}
       <section className="panel">
         <div className="panel-head reveal d2">
           <span className="t">Studios</span>

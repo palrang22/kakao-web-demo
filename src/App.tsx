@@ -17,7 +17,7 @@ function Shell() {
   const isHub = pathname === "/";
 
   return (
-    <div className="shell">
+    <div className={isHub ? "shell shell-hub" : "shell"}>
       <Rail />
       <div className={isHub ? "main main-split" : "main"}>
         <Routes>

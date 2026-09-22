@@ -70,6 +70,31 @@
   .rail button.ritem{border:none;background:none;padding:0;font:inherit;-webkit-appearance:none;appearance:none}
   .rail .gc{width:26px;height:26px;opacity:.9;margin-top:6px}
 
+  /* 허브(랜딩) 페이지: 왼쪽 레일과 히어로가 딥 인디고로 일체화 */
+  .shell-hub .rail {
+    /* 히어로 그라데이션의 왼쪽 가장자리와 같은 톤으로 이어 붙인다 */
+    background: linear-gradient(180deg, #141862 0%, #0d1046 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .shell-hub .rail .mark {
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+  }
+  .shell-hub .rail .ritem {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .shell-hub .rail .ritem:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .shell-hub .rail .ritem.on {
+    color: var(--brand-yellow);
+    background: rgba(250, 227, 0, 0.12);
+  }
+  .shell-hub .rail .ritem.on::before {
+    background: var(--brand-yellow);
+  }
+
   /* ---------- main ---------- */
   .main{min-height:100vh}
   /* 허브(랜딩)에서만 히어로 + 패널 2열 분할.
@@ -79,66 +104,155 @@
   @media(max-width:900px){.main-split{grid-template-columns:1fr}}
 
   /* ---------- hero ---------- */
+  /* 딥 인디고 캔버스 위의 라인 드로잉. 강조는 화이트·블루 계열로 하고,
+     옐로(--brand-yellow)는 점 하나 크기로만 찍는다. */
   .hero{
-    /* 왼쪽 히어로는 포인트 컬러(인디고)로 통짜 채운다 — 텍스트 계열 토큰을
-       이 안에서만 흰색 계열로 다시 정의한다(오른쪽 패널·다른 라우트는 그대로 화이트). */
     --paper:#ffffff;
-    --fog:rgba(255,255,255,.68);
-    --fog-2:rgba(255,255,255,.88);
-    position:relative;padding:clamp(32px,4.6vw,56px) clamp(26px,4.8vw,60px);
+    --fog:rgba(255,255,255,.62);
+    --fog-2:rgba(255,255,255,.80);
+    --hero-label:#A8BCFF;   /* 딥 인디고 위에서 읽히는 밝은 블루 라벨 */
+    position:relative;
+    padding:clamp(34px,4.4vw,54px) clamp(30px,5vw,64px) clamp(28px,3.4vw,40px);
     border-right:1px solid var(--line);
-    display:flex;flex-direction:column;
+    display:flex;
+    flex-direction:column;
     overflow:hidden;
+    isolation:isolate;
     background:
-      radial-gradient(120% 80% at 20% 0%, color-mix(in srgb,var(--brand) 62%,white) 0%, var(--brand) 55%);
+      linear-gradient(152deg, #141862 0%, #1A199B 46%, #0C0E42 100%);
     color:var(--paper);
+    min-height:100vh;
   }
-  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
-  /* header-logo-dot.svg 는 인디고 단색 마크라 인디고 배경 위에선 안 보인다 — 흰색으로 반전 */
-  .hero .eyebrow-logo{height:22px;width:auto;opacity:.95;filter:brightness(0) invert(1)}
-  .partners{display:flex;align-items:center;gap:13px}
-  .partners img.kakao{height:20px;opacity:.92}
-  .partners .x{color:var(--fog);font-size:13px;font-weight:300}
-  .partners img.gc{height:20px;opacity:.92}
+  /* 아주 옅은 대각 하이라이트 — 평평한 그라데이션에 결을 준다 */
+  .hero::after{
+    content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(112deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 42%);
+  }
 
-  .hero-body{margin:auto 0}
-  h1{
+  /* ---------- hero 배경 아트 ---------- */
+  .hero-art{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .hero-art .glow{position:absolute;border-radius:50%;filter:blur(90px)}
+  .hero-art .glow-a{
+    width:min(52vw,520px);aspect-ratio:1;right:-12%;top:-14%;
+    background:radial-gradient(circle, rgba(50,92,255,.42) 0%, rgba(50,92,255,0) 70%);
+  }
+  .hero-art .glow-b{
+    width:min(44vw,420px);aspect-ratio:1;left:-18%;bottom:-16%;
+    background:radial-gradient(circle, rgba(81,122,251,.24) 0%, rgba(81,122,251,0) 70%);
+  }
+  /* 돛단배는 오른쪽 아래 모서리에 두고, 본문 타이포와 겹치지 않을 크기로 억제한다 */
+  .art-sail{
+    position:absolute;right:-7%;bottom:7%;
+    width:clamp(260px,30vw,420px);height:auto;
+    opacity:.8;
+  }
+  .art-waves{
+    position:absolute;left:0;right:0;bottom:2%;
+    width:100%;height:clamp(70px,12vh,120px);
+  }
+
+  /* ---------- hero 상단 ---------- */
+  .hero-top{
+    position:relative;z-index:1;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .hero .eyebrow-logo{height:22px;width:auto;filter:brightness(0) invert(1);opacity:.95}
+  .hero-top .partners{
+    display:flex;align-items:center;gap:10px;
+    padding:6px 14px;
+    background:rgba(255,255,255,.07);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;
+  }
+  .hero-top .partners img.kakao{height:16px;width:auto;display:block}
+  .hero-top .partners .x{color:rgba(255,255,255,.45);font-size:11px;font-weight:300}
+  .hero-top .partners img.gc{height:15px;width:auto;display:block}
+
+  /* ---------- hero 본문 ---------- */
+  .hero-body{position:relative;z-index:1;margin:auto 0;padding:clamp(28px,4vw,48px) 0}
+
+  /* 키커 — 얇은 아웃라인 칩. 옐로는 앞의 점 하나만 */
+  .hero-kicker{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:7px 15px 7px 12px;
+    border:1px solid rgba(255,255,255,.20);
+    border-radius:999px;
+    background:rgba(255,255,255,.05);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    font-size:11px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+    color:rgba(255,255,255,.86);
+    margin-bottom:clamp(20px,2.2vw,28px);
+  }
+  .hero-kicker .dot{
+    width:6px;height:6px;border-radius:50%;flex:none;
+    background:var(--brand-yellow);
+    box-shadow:0 0 0 3px rgba(250,227,0,.18);
+  }
+
+  /* 캐치프레이즈 — 1행은 눌러서, 2행은 화이트 볼드로 세운다 */
+  h1.pitch{
     font-family:var(--sans-kakao);
-    font-weight:800;letter-spacing:-.01em;color:var(--paper);margin:0;
+    margin:0;
+    display:flex;flex-direction:column;
+    font-size:clamp(38px,5.1vw,68px);
+    line-height:1.12;
+    letter-spacing:-.03em;
   }
-  .hero-body h1.pitch{
-    font-size:clamp(40px,5.6vw,78px);line-height:1.28;
+  h1.pitch .l1{font-weight:600;color:rgba(255,255,255,.62)}
+  h1.pitch .l2{
+    display:inline-flex;align-items:flex-end;width:fit-content;
+    font-weight:800;color:#ffffff;
   }
-  .hero-body h1.pitch .out{
-    color:transparent;-webkit-text-stroke:1.5px var(--paper);
-  }
-  .meta{
-    margin-top:38px;display:flex;gap:28px;
-    font-size:12px;color:var(--fog);letter-spacing:.04em;
-  }
-  .meta b{display:block;color:var(--paper);font-size:13px;font-weight:800;letter-spacing:0;margin-bottom:3px}
-
-  .sail-deco{
-    position:absolute;right:clamp(30px,4vw,60px);bottom:clamp(80px,11vh,120px);
-    display:flex;align-items:flex-end;gap:6px;pointer-events:none;
-  }
-  /* 항로(왼쪽)와 배(오른쪽)를 나란히 배치 — 겹치지 않게 flex 로 분리 */
-  .sail-deco .sail-route{
-    width:clamp(46px,5vw,300px);height:auto;opacity:.5;
-    transform: rotate(-20deg);
-  }
-  .sail-deco .sail-boat{
-    align-self:flex-start;
-    width:clamp(34px,3.6vw,48px);height:auto;
-    filter:drop-shadow(0 6px 10px rgba(0,0,0,.28));
-    transform: translateY(-16px) rotate(-10deg);
+  /* 문장 끝 옐로 점 — 히어로에서 옐로를 쓰는 두 곳 중 하나 */
+  h1.pitch .l2 .tip{
+    width:.15em;height:.15em;border-radius:50%;flex:none;
+    background:var(--brand-yellow);
+    margin:0 0 .2em .16em;
   }
 
+  /* 캐치프레이즈 아래 얇은 블루 룰 */
+  .hero-body .hero-desc{position:relative;padding-top:clamp(20px,2.2vw,26px);margin:clamp(20px,2.4vw,28px) 0 0;max-width:34ch}
+  .hero-body .hero-desc::before{
+    content:"";position:absolute;top:0;left:0;
+    width:56px;height:2px;border-radius:2px;
+    background:linear-gradient(90deg, var(--brand-2) 0%, rgba(81,122,251,0) 100%);
+  }
+  .hero-desc{
+    font-size:14.5px;line-height:1.72;color:var(--fog-2);font-weight:400;
+    word-break:keep-all;
+  }
+
+  /* 메타 — 유리 칩 대신 헤어라인 위 3열 정보 */
+  .hero-meta{
+    display:flex;flex-wrap:wrap;align-items:flex-start;
+    gap:clamp(22px,3.4vw,52px);
+    margin:clamp(30px,3.6vw,44px) 0 0;
+    padding-top:clamp(18px,2vw,24px);
+    border-top:1px solid rgba(255,255,255,.16);
+    max-width:min(100%,520px);
+  }
+  .hero-meta .meta-item{display:flex;flex-direction:column;gap:7px;margin:0}
+  .hero-meta dt{
+    font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--hero-label);
+  }
+  .hero-meta dd{
+    margin:0;
+    font-size:clamp(15px,1.25vw,17px);font-weight:700;color:#ffffff;
+    letter-spacing:-.01em;font-variant-numeric:tabular-nums;
+  }
+  .hero-meta dd .dim{color:rgba(255,255,255,.55);font-weight:500}
+
+  /* ---------- hero 푸터 ---------- */
   .footline{
-    margin-top:auto;padding-top:34px;display:flex;align-items:center;gap:10px;
-    font-size:11px;color:var(--fog);letter-spacing:.14em;text-transform:uppercase;
+    position:relative;z-index:1;margin-top:auto;padding-top:24px;
+    display:flex;align-items:center;gap:8px;
+    font-size:11px;color:var(--fog);
+    letter-spacing:.1em;text-transform:uppercase;
   }
-  .footline img{height:16px;opacity:.75}
+  .footline img{height:15px;width:auto;opacity:.85}
+  .powered-name{font-weight:600;color:rgba(255,255,255,.9)}
 
   /* ---------- module panel ---------- */
   .panel{
@@ -227,26 +341,32 @@
 
   /* 2열이 1열로 붕괴하는 지점 (.main-split 과 동일: 900px). 히어로 테두리를 오른쪽→아래로. */
   @media(max-width:900px){
-    .hero{border-right:none;border-bottom:1px solid var(--line);padding:40px 30px 46px}
+    .hero{border-right:none;border-bottom:1px solid var(--line);padding:44px 30px 48px;min-height:auto}
     .panel{padding:40px 30px}
-    .hero::after{width:360px;right:-90px;bottom:-70px}
+    .art-sail{width:clamp(240px,40vw,360px);opacity:.7}
   }
   @media(max-width:620px){
     .shell{grid-template-columns:52px 1fr}
     .rail{padding:14px 0}
-    .hero-top{flex-direction:column;align-items:flex-start;gap:16px}
-    .hero{padding:34px 22px 40px}
-    .panel{padding:34px 22px}
-    h1{font-size:clamp(38px,13vw,60px)}
-    .lede{font-size:14px}
-    .meta{flex-wrap:wrap;gap:18px 26px}
-    .mod{padding:20px 18px;gap:16px;align-items:flex-start}
-    .mod .glyph{width:46px;height:46px;flex-basis:46px}
-    .mod .glyph svg{width:22px;height:22px}
-    .mod .txt h3{font-size:19px}
-    .mod .txt p{font-size:12.5px}
-    .mod .go{width:38px;height:38px;flex-basis:38px;align-self:center}
-    .panel-foot{flex-direction:column;gap:12px;align-items:flex-start}
+    .hero-top{flex-direction:column;align-items:flex-start;gap:12px}
+    .hero{padding:26px 16px 36px}
+    .panel{padding:28px 16px}
+    .hero-kicker{font-size:10px;letter-spacing:.14em;margin-bottom:14px;padding:6px 12px 6px 10px}
+    h1.pitch{font-size:clamp(28px,8.5vw,40px);line-height:1.2}
+    .hero-body .hero-desc{font-size:13px;margin-top:18px;padding-top:16px}
+    .hero-desc{line-height:1.6}
+    .hero-meta{gap:18px 26px;margin-top:24px;padding-top:16px}
+    .hero-meta dd{font-size:14px}
+    .footline{font-size:10px}
+    .art-sail{opacity:.45;right:-50px;bottom:0;width:210px}
+    .art-waves{height:60px}
+    .mod{padding:18px 16px;gap:14px;align-items:flex-start}
+    .mod .glyph{width:42px;height:42px;flex-basis:42px}
+    .mod .glyph svg{width:20px;height:20px}
+    .mod .txt h3{font-size:18px}
+    .mod .txt p{font-size:12px}
+    .mod .go{width:36px;height:36px;flex-basis:36px;align-self:center}
+    .panel-foot{flex-direction:column;gap:10px;align-items:flex-start}
   }
 
 /* 스타터 템플릿의 #root 고정폭·가운데정렬을 이 앱 레이아웃용으로 되돌린다 */
