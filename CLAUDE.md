@@ -188,7 +188,7 @@ docs/GCP-INFRA-GUIDE.md 선배 프로젝트 인프라 가이드
 (2026-09-21, `getComputedStyle` 로 직접 확인) — 임의로 바꾸지 말 것.
 
 ```
---brand   #1A199B   포인트 컬러(인디고) — kakaoaisail.org 실측값 rgb(25,25,155)와 거의 동일
+--brand   #191A9B   포인트 컬러(인디고) — kakaoaisail.org 실측값 rgb(25,25,155)와 거의 동일
 --brand-2 #325CFF   보조 포인트(블루) — kakaoaisail.org 에 이 값 그대로 존재
 --brand-3 #517AFB   블루의 밝은 변형 — 역시 실사이트에서 그대로 발견
 --brand-on #ffffff  브랜드 색 위에 얹는 글자

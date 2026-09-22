@@ -5,7 +5,7 @@
 :root{
     color-scheme: light;
     /* AI 돛 Summit 26 브랜드 컬러 — kakaoaisail.org 실제 사용값 확인 완료 */
-    --brand:#1A199B;
+    --brand:#191A9B;
     --brand-2:#325CFF;
     --brand-on:#ffffff;    /* 브랜드 강조색 위에 얹는 글자 */
     /* 카카오 옐로/브라운 — Look Studio(Try-On) 전용 포인트. 옐로 순색은 흰 배경 위
@@ -46,54 +46,31 @@
   .shell{display:grid;grid-template-columns:64px 1fr;min-height:100vh}
 
   /* ---------- left rail ---------- */
+  /* 허브·스튜디오 공통으로 브랜드 인디고(--brand) 바탕. 어두운 바탕이라
+     아이콘·로고는 흰색 계열, 활성 표시는 카카오 옐로를 쓴다. */
   .rail{
-    background:#F0F3FA;
-    border-right:1px solid var(--line);
+    background:var(--brand);
+    border-right:1px solid rgba(255,255,255,.07);
     display:flex;flex-direction:column;align-items:center;
     padding:18px 0;gap:6px;position:sticky;top:0;height:100vh;
   }
-  .rail .mark{width:40px;height:auto;margin-bottom:22px;opacity:.95}
+  .rail .mark{width:40px;height:auto;margin-bottom:22px;opacity:.95;filter:brightness(0) invert(1)}
   .rail .ritem{
     width:40px;height:40px;border-radius:11px;
-    display:grid;place-items:center;color:var(--fog);
+    display:grid;place-items:center;color:rgba(255,255,255,.55);
     cursor:pointer;transition:.18s ease;position:relative;
   }
   .rail .ritem svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
-  .rail .ritem:hover{color:var(--paper);background:var(--ink-3)}
-  .rail .ritem.on{color:var(--paper)}
+  .rail .ritem:hover{color:#ffffff;background:rgba(255,255,255,.08)}
+  .rail .ritem.on{color:var(--brand-yellow);background:rgba(250,227,0,.12)}
   .rail .ritem.on::before{
     content:"";position:absolute;left:-18px;top:50%;transform:translateY(-50%);
-    width:2px;height:20px;background:var(--paper);border-radius:2px;
+    width:2px;height:20px;background:var(--brand-yellow);border-radius:2px;
   }
   .rail .spacer{flex:1}
   /* 테마 토글은 button 이라 브라우저 기본 스타일을 지워야 .ritem 과 같아진다 */
   .rail button.ritem{border:none;background:none;padding:0;font:inherit;-webkit-appearance:none;appearance:none}
   .rail .gc{width:26px;height:26px;opacity:.9;margin-top:6px}
-
-  /* 허브(랜딩) 페이지: 왼쪽 레일과 히어로가 딥 인디고로 일체화 */
-  .shell-hub .rail {
-    /* 히어로 그라데이션의 왼쪽 가장자리와 같은 톤으로 이어 붙인다 */
-    background: linear-gradient(180deg, #141862 0%, #0d1046 100%);
-    border-right: 1px solid rgba(255, 255, 255, 0.07);
-  }
-  .shell-hub .rail .mark {
-    filter: brightness(0) invert(1);
-    opacity: 0.95;
-  }
-  .shell-hub .rail .ritem {
-    color: rgba(255, 255, 255, 0.55);
-  }
-  .shell-hub .rail .ritem:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
-  }
-  .shell-hub .rail .ritem.on {
-    color: var(--brand-yellow);
-    background: rgba(250, 227, 0, 0.12);
-  }
-  .shell-hub .rail .ritem.on::before {
-    background: var(--brand-yellow);
-  }
 
   /* ---------- main ---------- */
   .main{min-height:100vh}
@@ -119,7 +96,9 @@
     overflow:hidden;
     isolation:isolate;
     background:
-      linear-gradient(152deg, #141862 0%, #1A199B 46%, #0C0E42 100%);
+      /* 레일(--brand)과 이어 붙는 면이라 중간 스톱을 --brand 로 맞추고,
+         양 끝도 같은 인디고 계열에서 밝게/어둡게만 벌린다 */
+      linear-gradient(152deg, #2A2CC0 0%, var(--brand) 46%, #0E0F58 100%);
     color:var(--paper);
     min-height:100vh;
   }
