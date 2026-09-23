@@ -8,6 +8,12 @@ import {
 } from "../lib/image.ts";
 import { CONCEPTS, type Concept } from "../lib/concepts.ts";
 import { ErrorBanner } from "../components/ErrorBanner.tsx";
+import {
+  DEMO_MOTION,
+  DEMO_MOTION_WAIT_MS,
+  demoAbsoluteUrl,
+  isDemoMode,
+} from "../lib/demo.ts";
 import "../styles/studio.css";
 
 type JobStatus = "queued" | "running" | "completed" | "error";
@@ -57,6 +63,8 @@ const MAX_IMAGES = 10;
 const MAX_TOTAL_SECONDS = 40;
 const MIN_DURATION = 3;
 const RESOLUTIONS = ["360p", "720p", "1080p"] as const;
+/** 시연 모드 잡 id 접두어 — 폴링 대신 타이머로 완료시킨다 */
+const DEMO_JOB_PREFIX = "demo-";
 
 
 /** 길이 슬라이더 라벨 — 확장 모드면 붙인 뒤 총 길이도 같이 보여준다 */
@@ -225,42 +233,56 @@ export function MotionStudio() {
     if (!job || (job.status !== "queued" && job.status !== "running")) return;
 
     let cancelled = false;
+
+    const apply = (next: Job) => {
+      setJob(next);
+
+      if (
+        next.status === "completed" &&
+        next.videoUrl &&
+        next.interactionId
+      ) {
+        setHistory((prev) => [
+          ...prev,
+          {
+            interactionId: next.interactionId!,
+            prompt,
+            videoUrl: next.videoUrl!,
+            downloadUrl: next.downloadUrl,
+            downloadError: next.downloadError,
+            totalSeconds: next.totalSeconds ?? 0,
+          },
+        ]);
+        setPrompt("");
+        setPerson(null);
+        setConceptId(null);
+        setConceptImages([]);
+        setOutfitSrc(null);
+        setOutfitImage(null);
+        setAttachments([]);
+        setExtendFrom(null);
+      } else if (next.status === "error") {
+        setError(next.error ?? "알 수 없는 오류");
+        setErrorDetail(next.errorDetail ?? null);
+      }
+    };
+
+    // 시연 모드 — 서버를 부르지 않고 정해진 시간 뒤에 준비된 영상으로 완료 처리한다
+    if (job.id.startsWith(DEMO_JOB_PREFIX)) {
+      const t = setTimeout(
+        () =>
+          apply({ ...job, status: "completed", stage: "완료", interactionId: job.id }),
+        DEMO_MOTION_WAIT_MS,
+      );
+      return () => clearTimeout(t);
+    }
+
     const timer = setInterval(async () => {
       try {
         const res = await fetch(`/api/jobs/${job.id}`);
         const next = (await res.json()) as Job;
         if (cancelled) return;
-
-        setJob(next);
-
-        if (
-          next.status === "completed" &&
-          next.videoUrl &&
-          next.interactionId
-        ) {
-          setHistory((prev) => [
-            ...prev,
-            {
-              interactionId: next.interactionId!,
-              prompt,
-              videoUrl: next.videoUrl!,
-              downloadUrl: next.downloadUrl,
-              downloadError: next.downloadError,
-              totalSeconds: next.totalSeconds ?? 0,
-            },
-          ]);
-          setPrompt("");
-          setPerson(null);
-          setConceptId(null);
-          setConceptImages([]);
-          setOutfitSrc(null);
-          setOutfitImage(null);
-          setAttachments([]);
-          setExtendFrom(null);
-        } else if (next.status === "error") {
-          setError(next.error ?? "알 수 없는 오류");
-          setErrorDetail(next.errorDetail ?? null);
-        }
+        apply(next);
       } catch {
         if (!cancelled) {
           setError("서버와 통신하지 못했습니다");
@@ -366,6 +388,20 @@ export function MotionStudio() {
       : [person, outfitImage, ...conceptImages].filter(
           (a): a is Attachment => Boolean(a),
         );
+
+    if (isDemoMode()) {
+      const result = extendFrom ? DEMO_MOTION.extended : DEMO_MOTION.first;
+      setJob({
+        id: `${DEMO_JOB_PREFIX}${Date.now()}`,
+        status: "running",
+        stage: "영상 생성 중",
+        createdAt: Date.now(),
+        videoUrl: result.src,
+        downloadUrl: demoAbsoluteUrl(result.src),
+        totalSeconds: result.totalSeconds,
+      });
+      return;
+    }
 
     try {
       const res = await fetch("/api/generate", {

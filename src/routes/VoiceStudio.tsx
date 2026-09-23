@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PcmPlayer, fromBase64, startMicCapture } from "../lib/audio.ts";
 import { ErrorBanner } from "../components/ErrorBanner.tsx";
+import {
+  DEMO_VOICE_CHAR_MS,
+  DEMO_VOICE_VIDEO,
+  DEMO_VOICE_VIDEO_RATE,
+  isDemoMode,
+  loadDemoVoiceScript,
+} from "../lib/demo.ts";
 import "../styles/studio.css";
 
 type Health = {
@@ -81,6 +88,8 @@ function mergeTranscript(line: Line, next: string): string | null {
 }
 
 export function VoiceStudio() {
+  /** 시연 모드 — 웹캠 대신 준비된 영상, Live 대신 대본 자막 (진입 시 1회 판정) */
+  const [demo] = useState(isDemoMode);
   const [health, setHealth] = useState<Health | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [lines, setLines] = useState<Line[]>([]);
@@ -133,6 +142,8 @@ export function VoiceStudio() {
   const captionTimerRef = useRef<number | null>(null);
   /** 다음 자막 조각이 담당하는 소리가 시작되는 시각(초, AudioContext 기준) */
   const captionCursorRef = useRef(0);
+  /** 시연 대본 재생 회차 — stop() 이 올리면 진행 중인 대본이 멈춘다 */
+  const demoRunRef = useRef(0);
 
   useEffect(() => {
     fetch("/api/health")
@@ -149,6 +160,7 @@ export function VoiceStudio() {
 
   // 페이지에 들어오면 웹캠을 바로 켠다 (미리보기만 — 전송은 시작 버튼 이후).
   useEffect(() => {
+    if (demo) return;
     let cancelled = false;
     navigator.mediaDevices
       ?.getUserMedia({
@@ -175,9 +187,10 @@ export function VoiceStudio() {
       camStreamRef.current?.getTracks().forEach((t) => t.stop());
       camStreamRef.current = null;
     };
-  }, []);
+  }, [demo]);
 
   const stop = useCallback(() => {
+    demoRunRef.current += 1;
     if (frameTimerRef.current !== null) {
       clearInterval(frameTimerRef.current);
       frameTimerRef.current = null;
@@ -302,8 +315,65 @@ export function VoiceStudio() {
     }
   }
 
+  /**
+   * 시연 모드 — 서버 없이 guide.md 대본을 순서대로 흘린다 (음성 없음).
+   * 관상가 줄은 실제 자막처럼 한 글자씩, 손님 줄은 "듣고 있습니다" 뒤에 한 번에 뜬다.
+   */
+  async function runDemo() {
+    const run = ++demoRunRef.current;
+    const alive = () => demoRunRef.current === run;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    setError(null);
+    setNotice(null);
+    setLines([]);
+    setInterim("");
+    setPhase("connecting");
+    let script;
+    try {
+      [script] = await Promise.all([loadDemoVoiceScript(), wait(1200)]);
+    } catch (err) {
+      if (!alive()) return;
+      setError(err instanceof Error ? err.message : String(err));
+      setPhase("idle");
+      return;
+    }
+    if (!alive()) return;
+    setPhase("live");
+
+    for (const line of script) {
+      await wait(line.pauseMs);
+      if (!alive()) return;
+      lineIdRef.current += 1;
+      const id = lineIdRef.current;
+
+      if (line.role === "user") {
+        setHearing(true);
+        await wait(900);
+        if (!alive()) return;
+        setHearing(false);
+        setLines((prev) => [...prev, { id, role: "user", text: line.text, last: "" }]);
+        continue;
+      }
+
+      setSpeaking(true);
+      setLines((prev) => [...prev, { id, role: "model", text: "", last: "" }]);
+      for (let i = 1; i <= line.text.length; i++) {
+        await wait(DEMO_VOICE_CHAR_MS);
+        if (!alive()) return;
+        const text = line.text.slice(0, i);
+        setLines((prev) => prev.map((l) => (l.id === id ? { ...l, text } : l)));
+      }
+      setSpeaking(false);
+    }
+  }
+
   async function start() {
     if (phase !== "idle") return;
+    if (demo) {
+      void runDemo();
+      return;
+    }
     setError(null);
     setNotice(null);
     setLines([]);
@@ -574,7 +644,30 @@ export function VoiceStudio() {
 
       <section className="composer">
         <div className="voice-cam-wrap">
-          <video ref={previewRef} className="voice-cam" autoPlay playsInline muted />
+          {demo ? (
+            // 시연 모드 — 세션이 열린 뒤에야 인물 영상이 뜬다 (실제로는 웹캠이 먼저 켜지지만
+            // 촬영에서는 "시작 → 연결 → 화면 등장" 순서가 더 잘 읽힌다)
+            phase === "live" ? (
+              <video
+                className="voice-cam demo"
+                src={DEMO_VOICE_VIDEO}
+                autoPlay
+                loop
+                playsInline
+                muted
+                onLoadedMetadata={(e) => {
+                  e.currentTarget.defaultPlaybackRate = DEMO_VOICE_VIDEO_RATE;
+                  e.currentTarget.playbackRate = DEMO_VOICE_VIDEO_RATE;
+                }}
+              />
+            ) : (
+              phase === "idle" && (
+                <span className="voice-cam-empty">시작하면 카메라가 켜집니다</span>
+              )
+            )
+          ) : (
+            <video ref={previewRef} className="voice-cam" autoPlay playsInline muted />
+          )}
           {phase === "connecting" && (
             <span className="voice-cam-badge pending">관상가를 부르는 중…</span>
           )}
@@ -587,7 +680,7 @@ export function VoiceStudio() {
             type="button"
             className="mic-button"
             onClick={() => (phase === "idle" ? void start() : stop())}
-            disabled={health?.ready === false}
+            disabled={!demo && health?.ready === false}
           >
             {phase === "connecting" ? (
               <span className="spinner" aria-hidden />

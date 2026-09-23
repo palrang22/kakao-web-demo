@@ -13,6 +13,12 @@ import {
   type Garment,
 } from "../lib/garments.ts";
 import { ErrorBanner } from "../components/ErrorBanner.tsx";
+import {
+  DEMO_LOOK_SRC,
+  DEMO_LOOK_WAIT_MS,
+  demoAbsoluteUrl,
+  isDemoMode,
+} from "../lib/demo.ts";
 import "../styles/studio.css";
 
 type Health = {
@@ -32,6 +38,24 @@ type ResultImage = {
 type Picked = { key: string; att: Attachment };
 
 const dataUrl = (img: ResultImage) => `data:${img.mimeType};base64,${img.data}`;
+
+/** 시연 모드 결과 — 서버 응답과 같은 모양(base64)으로 만들어 "이 사진으로 계속하기"도 그대로 동작하게 한다 */
+async function loadDemoResult(): Promise<ResultImage> {
+  const res = await fetch(DEMO_LOOK_SRC);
+  if (!res.ok) throw new Error(`시연용 이미지를 불러오지 못했습니다 (${DEMO_LOOK_SRC})`);
+  const blob = await res.blob();
+  const url = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+  return {
+    data: url.slice(url.indexOf(",") + 1),
+    mimeType: blob.type || "image/png",
+    downloadUrl: demoAbsoluteUrl(DEMO_LOOK_SRC),
+  };
+}
 
 /** 선택한 의상 미리보기 (0~2벌) — 인물 옆 칸 */
 function ChosenGarments({
@@ -253,6 +277,21 @@ export function LookStudio() {
     setError(null);
     setElapsed(0);
     setBusy(true);
+
+    if (isDemoMode()) {
+      try {
+        const [image] = await Promise.all([
+          loadDemoResult(),
+          new Promise((r) => setTimeout(r, DEMO_LOOK_WAIT_MS)),
+        ]);
+        setResults([image]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
 
     try {
       // 01번과 달리 LRO 가 아니라 동기 호출이다 — 잡 폴링 없이 응답을 기다린다

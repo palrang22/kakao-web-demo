@@ -165,6 +165,7 @@ src/lib/theme.ts, ThemeProvider.tsx  테마 플레이스홀더 (라이트 고정
 src/lib/image.ts, audio.ts  이미지 읽기 / PCM 캡처·재생 유틸. image.ts `shrink()` 는 모델로 보내기 전 긴 변 1920px 로 줄이고, PNG/JPEG 가 아니면(=샘플 webp) 크기와 무관하게 JPEG 로 재인코딩 (함정 7)
 src/lib/errorReport.ts  원본 에러를 새 탭에 띄우는 유틸 (ErrorBanner·DownloadQr 공유)
 src/lib/concepts.ts    01 컨셉 (버튼 → prompt 자동 채움 + 배경 refImages + 옷 outfits). 시나리오는 시안, 프롬프트 문구는 Omni 1.1 prompt guide 에 맞춰 작성 (규칙은 파일 상단 주석 — 영어·<IMAGE_REF_N> 태그·타임코드)
+src/lib/demo.ts        시연 영상 촬영용 모드. /settings 토글(localStorage) → 세 스튜디오가 모델 대신 public/demo/ 결과를 보여줌. 03 대본은 public/demo/visual-studio/guide.md 를 읽는다. ⚠️ 부스 운영 전 반드시 끌 것
 src/lib/garments.ts    02 샘플 의상 (폴더별 섹션). public/samples/look-studio/
 src/routes/Hub.tsx      랜딩 — 히어로 + 스튜디오 3개 카드
 src/routes/MotionStudio.tsx  01 (Omni Flash, 잡 폴링) — 인물+컨셉 선택, 확장 모드는 사진 추가
