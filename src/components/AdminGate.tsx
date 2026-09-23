@@ -52,7 +52,7 @@ function Gate({ prompt, onUnlock }: { prompt: string; onUnlock: () => void }) {
 /** 잠겨 있으면 게이트를, 풀려 있으면 children 을 렌더한다. 세션 내내 유지. */
 export function AdminGate({
   children,
-  prompt = "운영용 화면입니다. 비밀번호를 입력하세요.",
+  prompt = "비밀번호를 입력하세요.",
 }: {
   children: ReactNode;
   prompt?: string;

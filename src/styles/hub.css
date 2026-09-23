@@ -464,7 +464,8 @@
 
 .consent-check {
   display: flex;
-  align-items: flex-start;
+  /* 한 줄짜리 문구라 체크박스와 글자의 중심을 맞춘다 */
+  align-items: center;
   gap: 10px;
   margin: 20px 0 22px;
   padding: 12px 14px;
@@ -476,7 +477,7 @@
   cursor: pointer;
 }
 .consent-check input {
-  margin-top: 1px;
+  margin: 0;
   width: 16px;
   height: 16px;
   accent-color: var(--accent);

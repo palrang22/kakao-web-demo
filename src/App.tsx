@@ -52,7 +52,7 @@ function Shell() {
           <Route
             path="/gallery"
             element={
-              <AdminGate prompt="갤러리는 관리자 전용입니다. 비밀번호를 입력하세요.">
+              <AdminGate prompt="비밀번호를 입력하세요.">
                 <Gallery />
               </AdminGate>
             }
