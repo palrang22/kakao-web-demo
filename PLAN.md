@@ -5,6 +5,12 @@
 > 이 문서는 더 이상 "앞으로 할 일"이 아니라 **과거 변경 이력 확인용 참고 자료**로만 남긴다.
 > 새로운 할 일은 여기에 추가하지 말 것 — 필요하면 새 문서를 만든다.
 
+> 📌 **이 문서의 GCP 값은 전부 SM 시절(`minling-ai-day-project` / `smproject-*`) 것이라 지금은
+> 유효하지 않다.** 2026-09-22 에 카카오 전용 프로젝트 `kakao-ai-summit-26-20260921` 을 새로 파서
+> Cloud Run `kakao-web-demo`(asia-northeast3) 배포 + IAP 설정까지 마쳤다. 런타임 SA 는
+> `kakao-ai-runner@...`, 출력 버킷은 `gs://kakao-demo-web-bucket/output` 이다.
+> **현재 값은 `CLAUDE.md` §GCP 설정 / §접근 제어 / §배포 를 볼 것.** 아래 본문은 SM 시절 이력이다.
+
 > 최종 갱신: **2026-09-10** — `minling-ai-day-project` 로 프로젝트 이전하며 갱신.
 > 배경·GCP 설정·디자인 토큰·비용·함정은 `CLAUDE.md`. 이 문서는 **부스(2026-09-14) 전까지 할 일**만 담는다.
 

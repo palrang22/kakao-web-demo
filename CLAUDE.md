@@ -58,43 +58,39 @@ pnpm optimize:samples  # public/samples/**/*.png → webp (긴 변 1536px). 원�
 
 ## GCP 설정 (이미 되어 있음 — 다시 만들지 말 것)
 
-> ⚠️ 아래 프로젝트/SA/버킷/IAP 도메인은 **SM AI Day 부스 때 실제로 구성한 인프라**다.
-> 카카오 AI 돛 Summit 26 용으로 같은 인프라를 재사용할지, 새로 팔지는 아직 정해지지 않았다.
-> **확정된 것(2026-09-21):** 계정(`kseungh@mz.co.kr`)은 그대로 쓰지만, **GCP 프로젝트는
-> 나중에 새로 판다** — 지금의 `minling-ai-day-project`/SA/버킷/IAP 설정을 카카오 배포에
-> 그대로 쓰면 안 된다. 이름에 `sm`/`smproject` 가 남아 있다고 임의로 카카오 이름으로
-> 바꿔 쓰지도 말 것 — 실제 GCP 리소스 이름과 문서가 어긋나면 더 위험하다. 새 프로젝트가
-> 만들어지기 전엔 이 절의 값을 그대로 참고만 하고, 실제 배포 전에 사용자에게 재확인할 것.
+> 2026-09-22 에 **카카오 전용 프로젝트를 새로 파서 배포·IAP 까지 전부 마쳤다.**
+> 아래 값은 2026-09-23 에 `gcloud` 로 실제 리소스를 읽어 확인한 것이다.
+> SM 시절 인프라(`minling-ai-day-project` / `smproject-*`)는 이 앱과 무관하다 — 맨 아래 참고.
 
 ```
-프로젝트  minling-ai-day-project       (2026-09-10 프로젝트 이전 — 이전 kktae-demo 아님. 프로젝트 번호 926665583116)
-계정      kseungh@mz.co.kr             (회사 계정. 이 프로젝트에선 Owner)
-인증      Vertex AI + ADC              (API 키 아님)
-리전      global                       (Vertex 호출 리전. Cloud Run 배포 리전(asia-northeast3)과 다름)
-버킷      gs://smproject-sh2/output    (asia-northeast3. 이름이 smproject-sh 가 아닌 이유: 버킷명은
-                                        전역 유일 + 구 프로젝트가 30일 삭제 대기라 smproject-sh 재사용 불가)
+프로젝트  kakao-ai-summit-26-20260921   (이 앱 전용. 프로젝트 번호 120385871992)
+계정      kseungh@mz.co.kr              (회사 계정. 이 프로젝트에선 Owner)
+인증      Vertex AI + ADC               (API 키 아님)
+리전      global                        (Vertex 호출 리전. Cloud Run 배포 리전(asia-northeast3)과 다름)
+버킷      gs://kakao-demo-web-bucket/output   (asia-northeast3, UBLA + public access prevention 적용)
+Cloud Run kakao-web-demo (asia-northeast3)
+URL       https://kakao-web-demo-vkpvjhgm4a-du.a.run.app   (IAP 뒤 — 로그인 없이는 안 열린다)
 ```
 
-- 인증은 `gcloud auth application-default login` + `gcloud auth application-default set-quota-project minling-ai-day-project` 로 이미 잡혀 있다.
-- 버킷은 이 프로젝트 안에 새로 만든 것. **자동 삭제 규칙은 두지 않는다** (합의 D6). 부스 결과물은
-  행사 종료 후 스태프가 수동으로 비운다 — 동의 팝업이 약속한 내용이므로 체크리스트에 있다 (`PLAN.md`).
-- **런타임 서비스 계정** `smproject-ai-runner@minling-ai-day-project.iam.gserviceaccount.com`
-  (이름 **단수** `smproject-` 주의 — kktae-demo 때는 `smprojects-` 였다). 보유 역할:
-  - Vertex 호출용 역할 (콘솔 표기 "Agent Platform User" — `roles/aiplatform.user` 계열)
-  - `roles/storage.objectAdmin` — **버킷 `smproject-sh2` 한정** 바인딩 (프로젝트 레벨 아님)
-  - `roles/iam.serviceAccountTokenCreator` — self-bind, 서명 URL(signBlob)용
-  - 프로젝트 레벨 `Editor` 는 **안 줬다** (공용 프로젝트 — 최소권한). kktae-demo 때와 다른 점.
-  로컬 `pnpm dev` 는 개인 ADC 라 Vertex·스토리지는 되고, 서명만 `GCS_SIGNER_SA`
-  (`.env.local`) impersonate 로 — 내 계정이 SA 에 token creator 를 가져야 동작 (아직 없음, 배포본에선 불필요).
-- **소스 배포용** 기본 compute SA `926665583116-compute@developer.gserviceaccount.com` 에
-  `roles/cloudbuild.builds.builder` 를 수동 부여했다 — `gcloud run deploy --source` 가 이 SA 로
-  Cloud Build 를 돌리는데, 조직 정책상 기본 SA 자동 역할 부여가 꺼져 있어서 직접 준 것.
-- ⚠️ **`minling-ai-day-project` 도 이 앱 전용이 아니라 공용 프로젝트다.** kktae-demo 때와 같은
-  원칙: **우리가 만든 리소스(SA `smproject-ai-runner`, 버킷 `smproject-sh2`, Cloud Run
-  `smprojects-sh`, Artifact Registry `cloud-run-source-deploy`)만 건드리고, 이미 있던 다른
-  리소스는 절대 만지지 말 것.** 예산·쿼터도 공용 계정으로 잡히니 비용 지출 전 확인 원칙 유지.
-- 구 배포(`kktae-demo` 의 `smprojects-sh` / `smproject-sh` 버킷 / `smprojects-ai-runner` SA)는
-  사용자가 직접 정리한다. 이전 프로젝트: `kktae-demo` ← `gcp-a-presales-ge-20260521` (둘 다 폐기).
+- 버킷에 **자동 삭제(lifecycle) 규칙은 없다** — 의도된 것(합의 D6). 부스 결과물은 행사 종료 후
+  스태프가 수동으로 비운다. 동의 팝업이 약속한 내용이라 체크리스트 항목이다.
+- **런타임 서비스 계정** `kakao-ai-runner@kakao-ai-summit-26-20260921.iam.gserviceaccount.com`
+  (표시 이름 "kakao web demo service account"). 실제 보유 역할:
+  - `roles/aiplatform.user` — 프로젝트 레벨. Vertex 호출용
+  - `roles/iam.serviceAccountTokenCreator` — 프로젝트 레벨. 서명 URL(signBlob)용
+  - `roles/storage.objectAdmin` — **버킷 `kakao-demo-web-bucket` 한정** 바인딩 (프로젝트 레벨 아님)
+- **소스 배포용** 기본 compute SA `120385871992-compute@developer.gserviceaccount.com` 은
+  `roles/cloudbuild.builds.builder` + `roles/editor` 를 갖고 있다. `gcloud run deploy --source` 가
+  이 SA 로 Cloud Build 를 돌린다.
+- 로컬 `pnpm dev` 는 개인 ADC 를 쓴다. Vertex·스토리지는 바로 되고, 서명 URL 만
+  `GCS_SIGNER_SA`(`.env.local`) impersonate 경로 — 내 계정이 위 SA 에 token creator 를 가져야
+  동작한다 (배포본에선 SA 자신이 갖고 있으므로 불필요).
+- 이 프로젝트는 **이 앱 전용**이라 SM 때 같은 "공용 프로젝트 주의" 제약은 없다. 다만
+  `firebase-adminsdk-fbsvc@...` SA 와 `run-sources-...` 버킷(Cloud Build 소스 업로드용)은
+  우리가 만든 게 아니니 건드리지 말 것.
+- **폐기된 과거 인프라** (사용자가 직접 정리): `minling-ai-day-project`(SM AI Day —
+  `smproject-ai-runner` / `gs://smproject-sh2` / Cloud Run `smprojects-sh`),
+  그 이전 `kktae-demo` ← `gcp-a-presales-ge-20260521`. 이 값들을 이 앱 문서·코드에 쓰지 말 것.
 
 ## 접근 제어 — IAP
 
@@ -102,14 +98,20 @@ pnpm optimize:samples  # public/samples/**/*.png → webp (긴 변 1536px). 원�
 로그인한 사람은 기능을 자유롭게 쓸 수 있다.
 
 - **Cloud Run 에 IAP 를 직접** 건다 (2026 GA. 로드밸런서 불필요)
-- 허용 대상: 주 구성원 `domain:mz.co.kr` + 역할 `roles/iap.httpsResourceAccessor`
+- 허용 대상: 역할 `roles/iap.httpsResourceAccessor` 에 `domain:mz.co.kr` **+ `domain:google.com`**
+  (2026-09-23 실측). `google.com` 도메인은 의도한 것이 아니면 콘솔에서 빼는 게 맞다 — 부스 전 확인 항목.
 - 앱 안에서 로그인 기능을 따로 만들지 말 것. IAP 가 이미 인증을 끝낸다.
-- **OAuth 클라이언트는 커스텀(직접 만든 것)이다.** `minling-ai-day-project` 의 조직 도메인이
-  `mz.co.kr` 이 아니라서 동의 화면을 **External** 로 두고 OAuth 2.0 클라이언트 ID 를 직접 만들어
-  IAP 에 연결했다 (Google-managed 클라이언트는 Internal 동의 화면에서만 됨). 리디렉션 URI 는
+- **OAuth 클라이언트는 커스텀(직접 만든 것)이다.** 프로젝트의 조직 도메인이 `mz.co.kr` 이
+  아니라서 동의 화면을 **External** 로 두고 OAuth 2.0 클라이언트 ID 를 직접 만들어 IAP 에
+  연결했다 (Google-managed 클라이언트는 Internal 동의 화면에서만 됨). 리디렉션 URI 는
   `https://iap.googleapis.com/v1/oauth/clientIds/<CLIENT_ID>:handleRedirect`.
-- `server/iap.ts` 검증용 `IAP_AUDIENCE` (Cloud Run env):
-  `/projects/926665583116/locations/asia-northeast3/services/smprojects-sh`
+  - OAuth 브랜드: `kakao ai summit 2026` (지원 이메일 `kseungh@mz.co.kr`)
+  - 클라이언트: `IAP-kakao-web-demo`
+    (`120385871992-2mn17rju39ujtppq13uedb02dttiq0gc.apps.googleusercontent.com`)
+- IAP 서비스 에이전트 `service-120385871992@gcp-sa-iap.iam.gserviceaccount.com` 이 Cloud Run
+  서비스에 `roles/run.invoker` 를 갖는다 — IAP 만 백엔드를 호출할 수 있게 하는 연결 고리다.
+- `server/iap.ts` 검증용 `IAP_AUDIENCE` (Cloud Run env, 이미 주입돼 있음):
+  `/projects/120385871992/locations/asia-northeast3/services/kakao-web-demo`
 
 IAP 통과 후 요청에 붙는 헤더:
 
@@ -232,29 +234,38 @@ SM CI 로고 SVG 6개는 리브랜딩 과정에서(이동 중 파일 잠금 이�
 ### 배포
 
 정적 파일 + API + Live WS 를 한 프로세스에서 서빙하는 실제 서버(`server/index.ts`)와
-`Dockerfile` 이 있고, **Cloud Run 에 배포 완료 + IAP 설정 + 스튜디오 3종·갤러리 실호출 검증까지 완료**
-(2026-09-10, `minling-ai-day-project` 로 이전하며 재검증).
+`Dockerfile` 이 있다. **카카오 전용 프로젝트에 배포 완료 + IAP 설정 + 스튜디오 3종·갤러리
+배포본 실호출 검증까지 완료** (2026-09-22, 리비전 `kakao-web-demo-00001-25l`).
 
 - `pnpm build` 가 `dist/`(프론트) + `dist-server/`(서버)를 만든다. `pnpm start` 로 로컬에서
   배포와 동일하게 띄울 수 있다.
-- **배포 방식**: Cloud Build. 프로젝트 루트에서
+- **재배포** (평소엔 이거면 된다). 서비스가 이미 있으면 `gcloud run deploy` 는 지정하지 않은
+  설정(SA·스케일·env·concurrency…)을 **현재 리비전에서 그대로 승계**한다:
   ```
-  gcloud run deploy smprojects-sh --source . \
-    --project minling-ai-day-project --region asia-northeast3 \
-    --service-account smproject-ai-runner@minling-ai-day-project.iam.gserviceaccount.com \
+  gcloud run deploy kakao-web-demo --source . \
+    --project kakao-ai-summit-26-20260921 --region asia-northeast3
+  ```
+  `--source .` 가 `Dockerfile` 로 빌드(buildpacks 아님) → Artifact Registry
+  `cloud-run-source-deploy`(asia-northeast3) → 배포.
+- **서비스를 처음부터 다시 만들 때만** 아래 전체 플래그가 필요하다 (2026-09-22 첫 배포 구성):
+  ```
+  gcloud run deploy kakao-web-demo --source . \
+    --project kakao-ai-summit-26-20260921 --region asia-northeast3 \
+    --service-account kakao-ai-runner@kakao-ai-summit-26-20260921.iam.gserviceaccount.com \
     --no-allow-unauthenticated \
     --min-instances 1 --max-instances 1 \
     --concurrency 80 --cpu 1 --memory 512Mi --timeout 300 --cpu-boost \
-    --set-env-vars GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_PROJECT=minling-ai-day-project,GOOGLE_CLOUD_LOCATION=global,GOOGLE_CLOUD_OUTPUT_GCS_URI=gs://smproject-sh2/output
+    --set-env-vars GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_PROJECT=kakao-ai-summit-26-20260921,GOOGLE_CLOUD_LOCATION=global,GOOGLE_CLOUD_OUTPUT_GCS_URI=gs://kakao-demo-web-bucket/output,IAP_AUDIENCE=/projects/120385871992/locations/asia-northeast3/services/kakao-web-demo
   ```
-  `--source .` 가 `Dockerfile` 로 빌드(buildpacks 아님) → Artifact Registry `cloud-run-source-deploy`
-  (자동 생성) → 배포. `IAP_AUDIENCE` 는 배포 후 `gcloud run services update ... --update-env-vars` 로 추가.
+  ⚠️ `--set-env-vars` 는 환경변수 **전체 교체**다. 일부만 고칠 땐
+  `gcloud run services update ... --update-env-vars` 를 쓸 것 — 안 그러면 `IAP_AUDIENCE` 가 날아가
+  `server/iap.ts` 가 no-op 이 된다.
 - **인스턴스 1개 고정**(`--min/max-instances 1`)은 의도된 것 — `server/api.ts` 의 인메모리 잡
   스토어(01 폴링)가 인스턴스 간 공유가 안 된다. 트래픽 없어도 1개가 상시 과금됨.
-- 남은 검증: **GCS 서명 URL(QR 다운로드)** 이 런타임 SA self-bind 로 실제 동작하는지 (Look Studio 1회).
-- IAP 는 배포된 서비스에 직접 걸려 있다. `server/iap.ts` 가 JWT 를 검증하려면 `IAP_AUDIENCE`
-  (위 §접근 제어에 실제 값) 가 있어야 한다 (없으면 no-op). 지금 코드는 라우트 차단 없이 로깅만 —
-  실제 인가 판단(킬 스위치·레이트리밋)은 이 신원으로 나중에 붙인다.
+- 남은 검증: **GCS 서명 URL(QR 다운로드)** 이 런타임 SA 의 token creator 역할로 실제 동작하는지
+  (Look Studio 1회). 갤러리는 서명 URL 대신 프록시 스트리밍이라 이 권한과 무관하게 이미 동작한다.
+- IAP 는 배포된 서비스에 직접 걸려 있고 `IAP_AUDIENCE` 도 주입돼 있다. 지금 코드는 라우트 차단
+  없이 로깅만 — 실제 인가 판단(킬 스위치·레이트리밋)은 이 신원으로 나중에 붙인다.
 
 ### 인증 모드 전환
 
